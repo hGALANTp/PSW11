@@ -110,7 +110,7 @@
 
                         <div class="row">
                             <div class="col-md">
-                                <form action="{% url 'add_doc' empresa.id %}" method="POST" enctype='multipart/form-data'>{% csrf_token %}
+                                <form action="{% url 'add_metrica' empresa.id %}" method="POST">{% csrf_token %}
                                 <label>Titulo</label>
                                 <input type="text" class="form-control" name="titulo" placeholder="Adicione um texto ...">
                                 
@@ -133,7 +133,7 @@
                 <h3>Solicitações de investimentos</h3>
                 <hr>
                 <br>
-                
+                    {%for pi in proposta_investimentos_enviada %}
                     <div class="bg-color-dark card-investimento">
                         <div class="row">
                             <div class="col-md">
@@ -166,7 +166,7 @@
                         </div>
                     </div>
                     <br>
-                
+                {% endfor %}    
             </div>
         </div>
     </div>

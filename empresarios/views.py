@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
-from .models import Empresas, Documento
+from .models import Empresas, Documento, Metricas
 from django.contrib import messages
 from django.contrib.messages import constants
+from investidores.models import PropostaInvestimento 
 
 # Create your views here.
 def cadastrar_empresa(request):
@@ -61,6 +62,7 @@ def listar_empresas(request):
 
 def empresa(request, id):
     empresa = Empresas.objects.get(id=id)
+     
     
     if empresa.user != request.user:
         messages.add_message(request, constants.ERROR, "Essa empresa não é sua")
@@ -68,7 +70,9 @@ def empresa(request, id):
     
     if request.method == "GET":
         documentos = Documento.objects.filter(empresa=empresa)
-        return render(request, 'empresa.html', {'empresa': empresa, 'documentos':documentos})   
+        proposta_investimentos = PropostaInvestimento.objects.filter(empresa=empresa)
+        proposta_investimentos_enviada = proposta_investimentos.filter(status='PE')
+        return render(request, 'empresa.html', {'empresa': empresa, 'documentos':documentos, 'proposta_investimentos_enviada':proposta_investimentos_enviada})   
      
     
 def add_doc(request, id):
@@ -102,9 +106,24 @@ def excluir_dc(request, id):
     documento = Documento.objects.get(id=id)
     if documento.empresa.user != request.user:
         messages.add_message(request, constants.ERROR, "Esse documento não é seu")
-        return redirect(f'/empresarios/empresa/{empresa.id}')
+        return redirect(f'/empresarios/empresa/{documento.empresa.id}')
     
     
     documento.delete()
     messages.add_message(request, constants.SUCCESS, "Documento excluído com sucesso")
-    return redirect(f'/empresarios/empresa/{documento.empresa}')
+    return redirect(f'/empresarios/empresa/{documento.empresa.id}')
+
+def add_metrica(request, id):
+    empresa = Empresas.objects.get(id=id)
+    titulo = request.POST.get('titulo')
+    valor = request.POST.get('valor')
+    
+    metrica = Metricas(
+        empresa=empresa,
+        titulo=titulo,
+        valor=valor
+    )
+    metrica.save()
+
+    messages.add_message(request, constants.SUCCESS, "Métrica cadastrada com sucesso")
+    return redirect(f'/empresarios/empresa/{empresa.id}')
